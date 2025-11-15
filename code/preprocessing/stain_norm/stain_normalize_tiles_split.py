@@ -1,0 +1,169 @@
+import numpy as np
+import glob
+from imageio.v2 import imread, imsave
+import sys
+import types
+# If `spams` is not installed on this system, importing `staintools`
+# may fail because some staintools modules import spams at top-level.
+# Insert a dummy `spams` module into sys.modules so `staintools` can be
+# imported; later we only use Macenko unless the real `spams` is present.
+try:
+    import spams  # type: ignore
+    HAS_SPAMS = True
+except Exception:
+    HAS_SPAMS = False
+    # create a lightweight placeholder module so `import staintools` succeeds
+    sys.modules.setdefault('spams', types.ModuleType('spams'))
+
+import staintools
+import os
+import os.path as osp
+import argparse as ap
+
+# %%
+# conduct the stain normalization
+def main(data_path, output_path, n_prop, batch):
+
+    # read images and sort
+    data_tiles = glob.glob(osp.join(data_path, '*.png'))
+    data_tiles = sorted(data_tiles)
+
+    # get the batch
+    batch_size = len(data_tiles) // n_prop
+    if batch==n_prop:
+        tiles_to_stain = data_tiles[(batch-1)*batch_size : ]
+    else:    
+        tiles_to_stain = data_tiles[(batch-1)*batch_size : batch*batch_size]
+
+    data_tiles = [osp.basename(x) for x in tiles_to_stain]
+    output_tiles = glob.glob(osp.join(output_path, '*.png'))
+    output_tiles = [osp.basename(x) for x in output_tiles]
+
+    # calculate what's left to stain
+    tiles_path = []
+    for x in data_tiles:
+        if not x in output_tiles:
+            tiles_path.append(osp.join(data_path, x))
+
+    print('total tiles %d, batch tiles %d, to-stain tiles %d' % (len(output_tiles), 
+            len(tiles_to_stain), len(tiles_path)))
+
+    # color standardizer the reference image
+    st_img = 'tumor_065_43224_100098.png'
+    print('standardizing reference image %s' % st_img)
+    try:
+        imagest = staintools.read_image(st_img)
+        imagest = staintools.LuminosityStandardizer.standardize(imagest)
+        print(f"Reference image shape: {imagest.shape}, dtype: {imagest.dtype}")
+    except Exception as e:
+        print(f"Error reading or standardizing reference image: {e}")
+        return
+
+    # fit a stain normalizer
+    print('fitting stain normalizer')
+
+    # Detect whether spams (Vahadane backend) is available in this env.
+    try:
+        import spams  # type: ignore
+        HAS_SPAMS = True
+    except Exception:
+        HAS_SPAMS = False
+
+    # Respect explicit opt-in via environment variable, but only use
+    # Vahadane if spams is actually present. Default to Macenko otherwise.
+    use_vahadane_env = os.environ.get('STAINTOOLS_USE_VAHADANE', '0') == '1'
+    if use_vahadane_env and not HAS_SPAMS:
+        print('STAINTOOLS_USE_VAHADANE=1 set but spams not found; falling back to Macenko')
+    method = 'vahadane' if (use_vahadane_env and HAS_SPAMS) else 'macenko'
+    print('selected stain extraction method:', method)
+
+    # Ensure reference image is uint8 and contiguous (staintools expects RGB uint8)
+    try:
+        imagest = np.ascontiguousarray(imagest, dtype=np.uint8)
+        print(f'Reference image coerced to dtype={imagest.dtype}, contiguous={imagest.flags.c_contiguous}')
+    except Exception as e:
+        print('WARNING: could not coerce reference image to uint8 contiguous:', e)
+
+    stain_normalizer = None
+    try:
+        stain_normalizer = staintools.StainNormalizer(method=method)
+        print('fitting stain normalizer to reference image')
+        stain_normalizer.fit(imagest)
+    except Exception as e:
+        print(f'Error fitting stain normalizer with method={method}: {e}')
+        # If attempted vahadane and it failed, try macenko as a fallback
+        if method == 'vahadane':
+            try:
+                print('Attempting fallback to Macenko')
+                stain_normalizer = staintools.StainNormalizer(method='macenko')
+                stain_normalizer.fit(imagest)
+                method = 'macenko'
+                print('Fallback to Macenko successful')
+            except Exception as e2:
+                print('Fallback to Macenko failed:', e2)
+                stain_normalizer = None
+        else:
+            stain_normalizer = None
+
+    print('stain normalizing images start...')
+    # stain normalize all tiles
+    num_non_std = 0
+    num_non_norm = 0
+    for i, tile in enumerate(tiles_path):
+        if i % 100 == 0:
+            print(i)
+        img = imread(tile)
+        img = img[:,:,:3]   # testing images are 4 channels
+        # standardize brightness
+        try:
+            img_standard = staintools.LuminosityStandardizer.standardize(img)
+        except:
+            num_non_std += 1
+            img_standard = img
+        # use exception to jupm over "Empty tissue mask computed"
+        try:
+            img_norm = stain_normalizer.transform(img_standard)
+        except:
+            num_non_norm += 0
+            # print(batch_sample.tile_loc[::-1], np.amin(img), np.amax(img)))
+            img_norm = img_standard
+        # save the result
+        imsave(osp.join(output_path, osp.basename(tile)), img_norm)
+    print(num_non_std, num_non_norm)
+
+
+
+# load in command line parameter, and call the main fucntion
+if __name__ == '__main__':
+    
+    parser = ap.ArgumentParser(description='Get dataset relative path')
+    parser.add_argument('-d', metavar='--subfolder', type=str, action='store', 
+                        dest='dataset', required=True, 
+                        help='Tile set subfolder, e.g., train/normal')
+    parser.add_argument('-n', metavar='--num_proportion', type=int, action='store', 
+                        dest='n_prop', required=True, 
+                        help='number of proportions to stain, e.g., 10')
+    parser.add_argument('-b', metavar='--batch', type=int, action='store', 
+                        dest='batch', required=True, 
+                        help='batch no. from the number of proportions, e.g., 1')
+            
+    # Gather the provided arguments as an array.
+    args = parser.parse_args()
+    folder = vars(args)['dataset']
+    print('dataset path:', folder)
+    data_path = osp.join('/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask', folder)
+    n_prop = vars(args)['n_prop']
+    batch = vars(args)['batch']
+    print('number of proportions', n_prop, 'prop no.', batch)
+
+    if not osp.exists(data_path):
+        print('dataset path %s does not exist!' % data_path)
+    elif n_prop<2 or n_prop>20:
+        print('number of proportions between 2 and 20')
+    elif batch<1 or batch>n_prop:
+        print('batch no. should be > 0 and <= num of proportion')
+    else:
+        output_path = data_path.replace('individualMask', 'individualMaskStainNorm')  # .replace(osp.basename(data_path),'00_test')
+        os.makedirs(output_path, exist_ok=True)
+        main(data_path, output_path, n_prop, batch)
+
