@@ -18,3 +18,25 @@ We validate HaMap’s reliability using four independent experiments. The result
 While whole-slide classification performance is strong, tile-level localization remains an area for further improvement.
 
 This repository will contain code, datasets, and pipelines for generating HaMap and HaMap++, as well as tools for evaluating saliency-guided diagnostic algorithms.
+
+## Environment Setup
+
+This project was developed and tested using Python X.Y and Conda.
+To reproduce the environment:
+1. Create the environment from the YAML file
+```
+conda env create -f environment.yml
+conda activate hamap
+```
+
+2. (Optional) Install packages via pip
+```
+pip install -r requirements.txt
+```
+
+3. GPU Support (optional)
+If using PyTorch with CUDA, install the matching version from:
+https://pytorch.org/get-started/locally/. Example:
+```
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
