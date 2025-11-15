@@ -1,0 +1,45 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python cache / build
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Logs and runs
+logs/
+runs/
+*.log
+
+# Large / raw data (we'll manage via external storage)
+data/
+*.h5
+*.hdf5
+*.tif
+*.svs
+*.npy
+*.npz
+*.pt
+*.pth
+
+# Cache dirs
+.cache/
