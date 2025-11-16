@@ -34,9 +34,34 @@ conda activate hamap
 pip install -r requirements.txt
 ```
 
-3. GPU Support (optional)
-If using PyTorch with CUDA, install the matching version from:
-https://pytorch.org/get-started/locally/. Example:
-```
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-```
+---
+
+## Stain Normalization Environment (stainenv)
+
+Stain normalization of tissue tiles requires a separate Conda environment due to specific dependencies (e.g., staintools, spams).
+
+To set up the `stainenv` environment:
+
+1. Create the environment from the provided YAML file:
+	```
+	conda env create -f stainenv.yml
+	conda activate stainenv
+	```
+
+
+2. Run stain normalization scripts (batch split recommended):
+	```
+	python stain_normalize_tiles_split.py -d <tile_dir> -n <num_batches> -b <batch_num>
+	```
+	Example:
+	```
+	python stain_normalize_tiles_split.py -d train/tumor/fixation_reduction_0.5_s6 -n 10 -b 1
+	```
+	This splits the tiles into 10 batches and processes batch 1. Adjust `-b` for other batches.
+
+**Note:**
+- The `stainenv.yml` file includes all required dependencies for stain normalization.
+- If you encounter issues with `spams`, the scripts will fall back to Macenko normalization (see code comments).
+
+---
+
