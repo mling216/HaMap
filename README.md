@@ -22,16 +22,10 @@ This repository will contain code, datasets, and pipelines for generating HaMap 
 ## Environment Setup
 
 This project was developed and tested using Python X.Y and Conda.
-To reproduce the environment:
-1. Create the environment from the YAML file
+To reproduce the environment, create the environment from the YAML file:
 ```
 conda env create -f environment.yml
 conda activate hamap
-```
-
-2. (Optional) Install packages via pip
-```
-pip install -r requirements.txt
 ```
 
 ---
