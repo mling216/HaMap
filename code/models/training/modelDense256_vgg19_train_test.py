@@ -40,7 +40,7 @@ ERROR_NAME = 'ERROR'
 ################### define model and objective #################
 def build_model():
     # Pick a CNN model as feature extractor
-    feature_generator = keras.applications.VGG19(include_top=False, input_shape=(224, 224, 3))
+    feature_generator = keras.applications.VGG19(include_top=False, weights='imagenet', input_shape=(224, 224, 3))
 
     ### define the mlp projection head
     MLP = keras.models.Sequential()
@@ -54,7 +54,7 @@ def build_model():
                         outputs=MLP(feature_generator.output))
 
     # set optimizer
-    sgd = keras.optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = keras.optimizers.legacy.SGD(learning_rate=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 
     # compile the model before train
     model.compile(loss='binary_crossentropy', 
@@ -79,7 +79,7 @@ def model_train(model, train_name):
     data_tumor_train = glob.glob(osp.join(data_path_train_tumor, '*.png'))
     data_tumor_train = [[x, 1] for x in data_tumor_train]
     num_tumor_train = len(data_tumor_train)
-    if num_tumor_train < 76000:
+    if num_tumor_train < 72000:
         print('train tumor tiles %d not complete!' % num_tumor_train)
         return ERROR_NAME
     else:
@@ -90,7 +90,7 @@ def model_train(model, train_name):
     data_normal_train_trainset = glob.glob(osp.join(data_path_train_normal_trainset, '*.png')) 
     data_normal_train_trainset = [[x, 0] for x in data_normal_train_trainset]
     num_normal_train_trainset = len(data_normal_train_trainset)
-    if num_normal_train_trainset < 79000:
+    if num_normal_train_trainset < 72000:
         print('train normal trainset s%s tiles %d not complete!' % (seed, num_normal_train_trainset))
         return ERROR_NAME
     else:
@@ -101,7 +101,7 @@ def model_train(model, train_name):
     data_tumor_val = glob.glob(osp.join(data_path_val_tumor, '*.png'))
     data_tumor_val = [[x, 1] for x in data_tumor_val]
     num_tumor_val = len(data_tumor_val)
-    if num_tumor_val < 18000:
+    if num_tumor_val < 17000:
         print('validation tumor tiles %d not complete!' % num_tumor_val)
         return ERROR_NAME
     else:
@@ -112,7 +112,7 @@ def model_train(model, train_name):
     data_normal_val_trainset = glob.glob(osp.join(data_path_val_normal_trainset, '*.png')) 
     data_normal_val_trainset = [[x, 0] for x in data_normal_val_trainset]
     num_normal_val_trainset = len(data_normal_val_trainset)
-    if num_normal_val_trainset < 18000:
+    if num_normal_val_trainset < 17000:
         print('validation normal trainset s%s tiles %d not complete!' % (seed, num_normal_val_trainset))
         return ERROR_NAME
     else:

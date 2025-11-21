@@ -54,7 +54,7 @@ def build_model():
                         outputs=MLP(feature_generator.output))
 
     # set optimizer
-    sgd = keras.optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = keras.optimizers.legacy.SGD(learning_rate=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 
     # compile the model before train
     model.compile(loss='binary_crossentropy', 
