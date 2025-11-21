@@ -6,7 +6,7 @@ We introduce **HaMap**, a habit-based fixation saliency map derived from routine
 
 - **AUC:** 0.95  
 - **Precision:** 0.90 (whole-slide diagnostic classification)  
-- **FROC:** 0.08 (tile-level lesion localization)
+- **FROC:** 0.16 (tile-level lesion localization)
 
 We validate HaMap’s reliability using four independent experiments. The results show:
 
