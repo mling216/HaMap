@@ -27,6 +27,7 @@ import openslide
 from openslide import OpenSlide, PROPERTY_NAME_MPP_X, PROPERTY_NAME_MPP_Y
 from scipy import ndimage as ndi
 from scipy.interpolate import interp1d
+import argparse
 
 # -----------------------
 # Config (YOUR paths)
@@ -35,13 +36,12 @@ PATCH_SIZE = 224
 SLIDE_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/testing/images/'
 BASE_TRUTH_DIR = '/fs/ess/PAS1575/Dataset/CAMELYON16/testing_masks/'
 ANNOTATION_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/lesion_annotations_test/'  # not used directly here
-PREDICTION_PATH = './whole_slide_prediction/'  # CSVs: test_001.csv, ...
 
 # -----------------------
 # File helpers
 # -----------------------
-def prob_filename(image_name: str) -> str:
-    return osp.join(PREDICTION_PATH, f'{image_name}.csv')
+def prob_filename(image_name: str, prediction_path: str) -> str:
+    return osp.join(prediction_path, f'{image_name}.csv')
 
 def gt_mask_filename(image_name: str) -> str:
     for ext in ('.tif', '.tiff', '.png'):
@@ -194,11 +194,20 @@ def match_detections_to_lesions(prob_tiles: np.ndarray, gt_tiles: np.ndarray, r_
         # 🔴 NEW: remove tiny predicted regions
         det = filter_small_pred_regions(det, min_region_tiles)
 
+        # Count TP: number of GT lesions hit by at least one predicted region
         hit_labels = set(np.unique(lbl_dil[det])) - {0}
         tp = min(len(hit_labels), n_lesions)
-        fp = int(np.count_nonzero(det & (~dil)))
+
+        # Count FP: number of predicted regions (connected components) not overlapping with any GT lesion
+        pred_labels, num_pred = ndi.label(det.astype(bool), structure=np.ones((3, 3), dtype=int))
+        fp_count = 0
+        for region_label in range(1, num_pred + 1):
+            region_mask = (pred_labels == region_label)
+            # If region does not overlap with any dilated GT, count as FP
+            if not np.any(dil[region_mask]):
+                fp_count += 1
         tps.append(tp)
-        fps.append(fp)
+        fps.append(fp_count)
 
     return thresholds, np.asarray(tps, float), np.asarray(fps, float), n_lesions
 
@@ -226,6 +235,8 @@ def camelyon_localization_score(fps_avg: np.ndarray, sensitivity: np.ndarray,
 # Runner
 # -----------------------
 def run_froc_for_images(image_names, 
+                        prediction_path,
+                        outdir,
                         gt_frac=0.5,
                         thresholds=np.linspace(0, 1, 101),
                         plot=False,
@@ -234,11 +245,14 @@ def run_froc_for_images(image_names,
     # ----------------------
     # Prepare output folder + CSV files
     # ----------------------
-    outdir = "./localization_score_FROC"
     os.makedirs(outdir, exist_ok=True)
 
     per_slide_csv = osp.join(outdir, f"per_slide_results_t{min_region_tiles}.csv")
+    per_slide_curves_dir = osp.join(outdir, f"per_slide_curves_t{min_region_tiles}")
     global_csv    = osp.join(outdir, f"global_froc_summary_t{min_region_tiles}.csv")
+    
+    # Create directory for saving full threshold curves per slide
+    os.makedirs(per_slide_curves_dir, exist_ok=True)
 
     # ----------------------
     # Load already processed slides
@@ -283,7 +297,7 @@ def run_froc_for_images(image_names,
         try:
             print(f"\nProcessing {image_name} ...")
             wsi_path = osp.join(SLIDE_PATH, image_name + '.tif')
-            prob_path = prob_filename(image_name)
+            prob_path = prob_filename(image_name, prediction_path)
             gt_mask_path = gt_mask_filename(image_name)
 
             prob_tiles = load_prob_tiles_from_csv(prob_path)
@@ -306,6 +320,11 @@ def run_froc_for_images(image_names,
                 min_region_tiles=min_region_tiles
             )
 
+            # Skip slides with zero GT lesions after downsampling
+            if n_lesions == 0:
+                print(f"Skipping {image_name} — no GT lesions after downsampling.")
+                continue
+
             # ----------------------
             # Append per-slide CSV result
             # ----------------------
@@ -325,7 +344,17 @@ def run_froc_for_images(image_names,
                     int(tps[idx09]), int(fps[idx09]),
                 ])
 
-            # Store full slide results for global FROC
+            # Save full threshold curves for this slide (for later aggregation)
+            curve_file = osp.join(per_slide_curves_dir, f"{image_name}_curve.csv")
+            curve_df = pd.DataFrame({
+                'threshold': th,
+                'TP': tps,
+                'FP': fps,
+                'n_lesions': n_lesions
+            })
+            curve_df.to_csv(curve_file, index=False)
+
+            # Store full slide results for global FROC (if processing all in one run)
             per_slide.append({
                 "thresholds": th,
                 "tps": tps,
@@ -343,7 +372,10 @@ def run_froc_for_images(image_names,
     # After all slides → compute global FROC
     # ----------------------
     if not per_slide:
-        print("No valid slides processed.")
+        print("No new slides processed in this run.")
+        print("Note: To compute FROC from existing results, you need to re-process all slides")
+        print("      because the per-slide CSV doesn't store full threshold curves.")
+        print("      Use --batch 0 with an empty output directory, or delete the per_slide CSV first.")
         return None
 
     thresholds, fps_avg, sensitivity = aggregate_froc_over_slides(per_slide)
@@ -358,6 +390,7 @@ def run_froc_for_images(image_names,
         if write_header:
             w.writerow([
                 "run_id",
+                "num_slides",
                 "score",
                 "sensitivity_fp_0.25",
                 "sensitivity_fp_0.5",
@@ -367,7 +400,8 @@ def run_froc_for_images(image_names,
                 "sensitivity_fp_8"
             ])
         w.writerow([
-            len(per_slide),  # simple run id = number of slides processed
+            len(per_slide),  # run id = number of slides processed in THIS run
+            len(per_slide),  # explicit count
             score,
             sens_table[0.25],
             sens_table[0.5],
@@ -406,18 +440,47 @@ def run_froc_for_images(image_names,
 # Main
 # -----------------------
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="CAMELYON-style FROC evaluation")
+    parser.add_argument('--prediction_path', type=str, required=True,
+                        help='Directory containing prediction CSV files (e.g., ./whole_slide_prediction_HaMap/)')
+    parser.add_argument('--outdir', type=str, required=True,
+                        help='Output directory for FROC results (e.g., ./localization_score_FROC_HaMap)')
+    parser.add_argument('--batch', type=int, default=0, choices=[0, 1, 2, 3, 4, 5],
+                        help='Batch number (1-5) to process slides in batches, or 0 to process all (default: 0)')
+    parser.add_argument('--min_region', type=int, default=10,
+                        help='Minimum region size (in tiles) to keep as detection (default: 10)')
+    parser.add_argument('--plot', action='store_true', help='Plot FROC curve')
+    parser.add_argument('--compute_froc', action='store_true',
+                        help='Compute global FROC from existing per-slide CSV (use after all batches complete)')
+    args = parser.parse_args()
+
     # get tumor slides only
     df_images = pd.read_csv('../cam16_test_reference.csv')
     df_images = df_images[df_images['type']=='Tumor']
     df_images.sort_values('image_id', inplace=True)
 
     # Discover slides that have both the WSI and the prediction CSV
-    image_names = []
-    for name in df_images['image_id'].tolist()[:25]:
-        if osp.exists(osp.join(SLIDE_PATH, name + '.tif')) and osp.exists(prob_filename(name)):
-            image_names.append(name)
+    all_image_names = []
+    for name in df_images['image_id'].tolist():
+        if osp.exists(osp.join(SLIDE_PATH, name + '.tif')) and osp.exists(prob_filename(name, args.prediction_path)):
+            all_image_names.append(name)
 
-    print(f"Found {len(image_names)} slides with both WSI and prediction CSV.")
+    print(f"Total slides found with both WSI and prediction CSV: {len(all_image_names)}")
+    
+    # Split into batches if requested
+    if args.batch > 0:
+        num_batches = 5
+        batch_size = (len(all_image_names) + num_batches - 1) // num_batches
+        start_idx = (args.batch - 1) * batch_size
+        end_idx = min(args.batch * batch_size, len(all_image_names))
+        image_names = all_image_names[start_idx:end_idx]
+        print(f"Processing batch {args.batch}/{num_batches}: slides {start_idx+1} to {end_idx} ({len(image_names)} slides)")
+    else:
+        image_names = all_image_names
+        print(f"Processing all {len(image_names)} slides")
+
+    print(f"Prediction path: {args.prediction_path}")
+    print(f"Output directory: {args.outdir}")
 
     # Optional: show tile metrics for the first available slide
     if image_names:
@@ -425,8 +488,47 @@ if __name__ == "__main__":
         info = tile_metrics_for_camelyon(osp.join(SLIDE_PATH, eg + '.tif'))
         print(f"{eg} tile metrics:", info)
 
-    # Run FROC over the set; set plot=True to display the FROC curve
-    results = run_froc_for_images(image_names, gt_frac=0.5, plot=False, min_region_tiles=10)
+    # Run FROC over the set
+    # If in batch mode (batch > 0), skip FROC computation
+    # If --compute_froc is set, compute FROC from existing per-slide CSV without processing slides
+    if args.compute_froc:
+        print("\n" + "="*60)
+        print("Computing global FROC from existing per-slide results...")
+        print("="*60)
+        
+        # Load per-slide results
+        per_slide_csv = osp.join(args.outdir, f"per_slide_results_t{args.min_region}.csv")
+        if not osp.exists(per_slide_csv):
+            print(f"ERROR: Per-slide CSV not found at {per_slide_csv}")
+            print("Please run slide processing first (without --compute_froc)")
+            exit(1)
+        
+        # Read per-slide data and reconstruct for FROC computation
+        # This is a simplified version - we won't have full threshold curves
+        # Just report that FROC computation requires re-running with batch=0
+        print(f"Found per-slide results at: {per_slide_csv}")
+        df_results = pd.read_csv(per_slide_csv)
+        print(f"Total slides in CSV: {len(df_results)}")
+        print("\nNOTE: Full FROC curve computation requires re-running without batches (--batch 0)")
+        print("The per-slide CSV contains TP/FP at specific thresholds (0.5, 0.9) but not the full curve.")
+        
+    else:
+        # Normal processing mode
+        skip_global_froc = (args.batch > 0)
+        
+        results = run_froc_for_images(image_names, 
+                                       prediction_path=args.prediction_path,
+                                       outdir=args.outdir,
+                                       gt_frac=0.5, 
+                                       plot=args.plot, 
+                                       min_region_tiles=args.min_region)
+        
+        if skip_global_froc:
+            print("\n" + "="*60)
+            print("Batch processing complete - per-slide results saved.")
+            print("Global FROC metrics NOT computed (requires all batches).")
+            print("After all batches finish, run with --batch 0 to compute FROC.")
+            print("="*60)
 
 """
 A typical small metastatic focus is hundreds of microns across, so one tile (50 µm) is extremely small relative to a true metastatic lesion.

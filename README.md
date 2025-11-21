@@ -36,6 +36,26 @@ pip install -r requirements.txt
 
 ---
 
+## Usage Pipeline
+
+After setting up the environment, follow these steps to reproduce the HaMap pipeline:
+
+### 1. Extract Tiles
+Extract tissue tiles from whole-slide images using scripts in `code/preprocessing/tilling/`.
+
+### 2. Stain Normalize Tiles
+Normalize the extracted tiles using `code/preprocessing/stain_norm/` (see Stain Normalization section below).
+
+### 3. Train and Test Models
+Train and test models using scripts in `code/models/training/` (see Train and Test a Model section below).
+
+### 4. Run Analyses
+Perform analyses using scripts in `code/analysis/`. Examples:
+- `Cal_overlap_Dice_AUC_sAUC.py` - Calculate overlap, Dice, AUC, and sAUC metrics
+- `Analyze_FROC_score.ipynb` - Analyze FROC scores
+
+---
+
 ## Stain Normalization Environment (stainenv)
 
 Stain normalization of tissue tiles requires a separate Conda environment due to specific dependencies (e.g., staintools, spams).
@@ -47,7 +67,6 @@ To set up the `stainenv` environment:
 	conda env create -f stainenv.yml
 	conda activate stainenv
 	```
-
 
 2. Run stain normalization scripts (batch split recommended):
 	```
@@ -62,6 +81,54 @@ To set up the `stainenv` environment:
 **Note:**
 - The `stainenv.yml` file includes all required dependencies for stain normalization.
 - If you encounter issues with `spams`, the scripts will fall back to Macenko normalization (see code comments).
+
+---
+
+## Train and Test a Model
+
+To train and test a model:
+
+```bash
+cd code/models/train-test/
+python modelDense256_vgg19_train_test.py -d tumor_0.3_s16
+```
+
+Where:
+- `-d` specifies the directory name for the training data
+- `0.3` represents the HaMap threshold level
+- `s16` indicates random seed 16
+
+---
+
+## Results
+
+### Analysis Notebooks
+Key analysis notebooks are available in `code/analysis/`:
+- `Analyze_FROC_score.ipynb` - FROC score analysis
+- `Analyze_ablation_results.ipynb` - Ablation study results
+- `slide_classification.ipynb` - Slide-level classification analysis
+- `eyetracking/` - Eye-tracking visualization notebooks
+
+### Result Figures
+Result plots are organized in `figures/`:
+
+**HaMap Results** (`figures/hamap_results_plots/`):
+- `AUC_compare_voting*.png` - AUC comparisons across voting strategies
+- `exp1_cohen_kappa.png` - Inter-rater agreement analysis
+- `exp1_result_voting_f1.png` - Voting results with F1 scores
+- `exp1_compare_wt_baseline_*.png` - Comparison with baseline methods
+- `exp2_compare_gaze_maps_*.png` - Gaze map comparison metrics
+- `fixation_iou_groundtruth.png` - Fixation overlap with ground truth
+- `num_fixation_tiles.png` - Fixation tile distribution
+
+**HaMap++ Results** (`figures/hamap_pp_results_plots/`):
+- `expX_model_comparison*.png` - Model performance comparisons
+- `mask_comparison_*.png` - Mask precision/recall analysis
+- `CLAM_vs_supervised_*.png` - CLAM vs supervised learning comparison
+- `expX_normal_gaze_proportion_comparison.png` - Normal gaze proportion analysis
+
+**Eye-tracking Visualizations** (`figures/eyetracking/`):
+- Thumbnail and PFMap visualizations with ground truth overlays
 
 ---
 
