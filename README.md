@@ -66,7 +66,7 @@ We captured eye-tracking and mouse movement data for all participant-image pairs
 
 ### WSI Tile Classification Performance
 <p align="center">
-  <img src="figures/combinedROCs.png" alt="ROC curves for test set tile classification" width="70%"/>
+  <img src="figures/combinedROCs.png" alt="ROC curves for test set tile classification" width="50%"/>
 </p>
 <p align="center"><i>ROC curves and AUC values for test set tile classification comparing Ground truth, Viewport method, weakly supervised CLAM model, DeepHaNet (HaMap-based), and DeepHaNet++ (HaMap++-based).</i></p>
 
@@ -80,8 +80,8 @@ We captured eye-tracking and mouse movement data for all participant-image pairs
 <table>
   <tr>
     <td width="33%" align="center"><img src="figures/weakly_supervised/test_051_gt.png" alt="Ground truth tumor region" width="100%"/></td>
-    <td width="33%" align="center"><img src="figures/weakly_supervised/test_051_CLAM_original.png" alt="CLAM original" width="100%"/></td>
-    <td width="34%" align="center"><img src="figures/weakly_supervised/test_051_CLAM_DeepHaNet_finetuned.png" alt="CLAM with DeepHaNet-finetuned ResNet50" width="100%"/></td>
+    <td width="33.6%" align="center"><img src="figures/weakly_supervised/test_051_CLAM_original.png" alt="CLAM original" width="100%"/></td>
+    <td width="33%" align="center"><img src="figures/weakly_supervised/test_051_CLAM_DeepHaNet_finetuned.png" alt="CLAM with DeepHaNet-finetuned ResNet50" width="100%"/></td>
   </tr>
   <tr>
     <td align="center"><i>Ground truth tumor region</i></td>
