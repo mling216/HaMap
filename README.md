@@ -48,6 +48,12 @@ We captured eye-tracking and mouse movement data for all participant-image pairs
   </tr>
 </table>
 
+### Training and Testing Data Preparation
+<p align="center">
+  <img src="figures/Tile_extraction_diagram.png" alt="Tile extraction diagram" width="80%"/>
+</p>
+<p align="center"><i>Diagram showing the preparation of training and testing data from tumor and normal tissue tiles.</i></p>
+
 ---
 
 ## Results
