@@ -53,10 +53,10 @@ We captured eye-tracking and mouse movement data for all participant-image pairs
 ## Results
 
 ### Localization Examples with HaMap and HaMap++
-<table style="width: 100%;">
+<table>
   <tr>
-    <td style="width: 50%;"><img src="figures/hamap_results_plots/tumor_016_PFMap_with_gt.png" alt="HaMap mask" style="width: 100%; height: auto; display: block;"/></td>
-    <td style="width: 50%;"><img src="figures/hamap++_results_plots/tumor_016_thumbnail_with_gt.png" alt="HaMap++ mask" style="width: 100%; height: auto; display: block;"/></td>
+    <td width="50%"><img src="figures/hamap_results_plots/tumor_016_PFMap_with_gt.png" alt="HaMap mask" width="100%"/></td>
+    <td width="50%"><img src="figures/hamap++_results_plots/tumor_016_thumbnail_with_gt.png" alt="HaMap++ mask" width="100%"/></td>
   </tr>
   <tr>
     <td align="center"><i>HaMap mask based on pathologist's fixations</i></td>
@@ -66,22 +66,22 @@ We captured eye-tracking and mouse movement data for all participant-image pairs
 
 ### WSI Tile Classification Performance
 <p align="center">
-  <img src="figures/combinedROCs.png" alt="ROC curves for test set tile classification" style="width: 70%; height: auto;"/>
+  <img src="figures/combinedROCs.png" alt="ROC curves for test set tile classification" width="70%"/>
 </p>
 <p align="center"><i>ROC curves and AUC values for test set tile classification comparing Ground truth, Viewport method, weakly supervised CLAM model, DeepHaNet (HaMap-based), and DeepHaNet++ (HaMap++-based).</i></p>
 
 ### Comparison of Different Models
 <p align="center">
-  <img src="figures/hamap++_results_plots/expX_all_model_comparison.png" alt="Model comparison on 100K-tile test set" style="width: 80%; height: auto;"/>
+  <img src="figures/hamap++_results_plots/expX_all_model_comparison.png" alt="Model comparison on 100K-tile test set" width="80%"/>
 </p>
 <p align="center"><i>Classification metrics on the test set comparing baseline ground truth-trained models (Large: all train tumor slides, Small: random 20 tumor slides), Fixation-reduction (small): HaMap-based DeepHaNet using 20 HaMaps, Random-small: 20 tumor slides with randomly sampled tiles, and Random-large: all train tumor slides with random sampling.</i></p>
 
 ### Weakly Supervised Tumor Localization with CLAM
-<table style="width: 100%;">
+<table>
   <tr>
-    <td style="width: 33.3%; text-align: center;"><img src="figures/weakly_supervised/test_051_gt.png" alt="Ground truth tumor region" style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; margin: 0 auto;"/></td>
-    <td style="width: 33.3%; text-align: center;"><img src="figures/weakly_supervised/test_051_CLAM_original.png" alt="CLAM original" style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; margin: 0 auto;"/></td>
-    <td style="width: 33.3%; text-align: center;"><img src="figures/weakly_supervised/test_051_CLAM_DeepHaNet_finetuned.png" alt="CLAM with DeepHaNet-finetuned ResNet50" style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; margin: 0 auto;"/></td>
+    <td width="33%" align="center"><img src="figures/weakly_supervised/test_051_gt.png" alt="Ground truth tumor region" width="100%"/></td>
+    <td width="33%" align="center"><img src="figures/weakly_supervised/test_051_CLAM_original.png" alt="CLAM original" width="100%"/></td>
+    <td width="34%" align="center"><img src="figures/weakly_supervised/test_051_CLAM_DeepHaNet_finetuned.png" alt="CLAM with DeepHaNet-finetuned ResNet50" width="100%"/></td>
   </tr>
   <tr>
     <td align="center"><i>Ground truth tumor region</i></td>
