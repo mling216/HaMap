@@ -157,8 +157,8 @@ def tsne_plot(features, data_tiles, data_labels, percent, stain):
 
 ################## main code ###############
 
-ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/fixation'
-ROOT_PATH_STAIN = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMaskStainNorm/fixation'
+ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/fixation'
+ROOT_PATH_STAIN = '/fs/scratch/PAS1575/Pathology/CAMELYON16/stain_normalized_tiles/fixation'
 RANDOM_DATA_SEED = 8 # 0 indicates random
 
 def main(percent):

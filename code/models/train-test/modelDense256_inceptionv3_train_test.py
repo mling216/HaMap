@@ -6,6 +6,9 @@
 
 ### Load libraries
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from myKerasDataset import DataGenerator
 import pickle
 import time
@@ -32,7 +35,7 @@ for d in physical_devices:
         pass 
 
 
-ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMaskStainNorm'
+ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/stain_normalized_tiles'
 ERROR_NAME = 'ERROR'
 
 
@@ -40,7 +43,7 @@ ERROR_NAME = 'ERROR'
 ################### define model and objective #################
 def build_model():
     # Pick a CNN model as feature extractor
-    feature_generator = keras.applications.InceptionV3(include_top=False, input_shape=(224, 224, 3))
+    feature_generator = keras.applications.InceptionV3(include_top=False, weights='imagenet', input_shape=(224, 224, 3))
 
     ### define the mlp projection head
     MLP = keras.models.Sequential()

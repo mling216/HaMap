@@ -327,10 +327,10 @@ PARTICIPANT_SET = ['1','2','3','4','5','7','8','9','10','11']  # the rest
 ### run the extraction
 def main(seed, weight_threshold):
     # create output path
-    output_path_train_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/train/tumor/20test_%s_s%d/' % (weight_threshold, seed)
+    output_path_train_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/train/tumor/20test_%s_s%d/' % (weight_threshold, seed)
     os.makedirs(output_path_train_tumor, exist_ok=True)
 
-    output_path_val_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/validation/tumor/20test_%s_s%d/' % (weight_threshold, seed)
+    output_path_val_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/validation/tumor/20test_%s_s%d/' % (weight_threshold, seed)
     os.makedirs(output_path_val_tumor, exist_ok=True)
 
     slide_info, extract_allocation = cal_extract_allocation(seed, weight_threshold)

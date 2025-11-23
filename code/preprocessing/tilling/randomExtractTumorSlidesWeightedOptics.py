@@ -357,14 +357,14 @@ TRAIN_SLIDES_PARTICIPANT = './experimentData/trainSlidesCorrectDaignosis.csv'
 ### run the extraction
 def main(seed, weight_threshold):
     # create output path
-    output_path_train_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/train/tumor/w_optics_%s_s%d/' % (weight_threshold, seed)
+    output_path_train_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/train/tumor/w_optics_%s_s%d/' % (weight_threshold, seed)
     os.makedirs(output_path_train_tumor, exist_ok=True)
-    output_path_train_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/train/normal/w_optics_%s_s%d/' % (weight_threshold, seed)
+    output_path_train_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/train/normal/w_optics_%s_s%d/' % (weight_threshold, seed)
     # os.makedirs(output_path_train_normal, exist_ok=True)
 
-    output_path_val_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/validation/tumor/w_optics_%s_s%d/' % (weight_threshold, seed)
+    output_path_val_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/validation/tumor/w_optics_%s_s%d/' % (weight_threshold, seed)
     os.makedirs(output_path_val_tumor, exist_ok=True)
-    output_path_val_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/validation/normal/w_optics_%s_s%d/' % (weight_threshold, seed)
+    output_path_val_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/validation/normal/w_optics_%s_s%d/' % (weight_threshold, seed)
     # os.makedirs(output_path_val_normal, exist_ok=True)
 
     slide_info, extract_allocation = cal_extract_allocation(seed, weight_threshold)

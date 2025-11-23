@@ -327,9 +327,9 @@ sample_fixation = pd.read_csv(file_tile_details)
 sample_fixation = sample_fixation[sample_fixation['threshold']==fixation_threshold]
 
 # create output path
-output_path_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/fixation/tumor/'
+output_path_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/fixation/tumor/'
 os.makedirs(output_path_tumor, exist_ok=True)
-output_path_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/fixation/normal/'
+output_path_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/fixation/normal/'
 os.makedirs(output_path_normal, exist_ok=True)
 
 # extract...

@@ -288,11 +288,11 @@ else:
 # %%
 # create output path
 if is_scaled:
-    output_path_train_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expandedIndividualMask/train/tumor_scaled_s{seed}'
-    output_path_val_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expandedIndividualMask/validation/tumor_scaled_s{seed}'
+    output_path_train_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expanded_extracted_tiles/train/tumor_scaled_s{seed}'
+    output_path_val_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expanded_extracted_tiles/validation/tumor_scaled_s{seed}'
 else:
-    output_path_train_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expandedIndividualMask/train/tumor_s{seed}'
-    output_path_val_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expandedIndividualMask/validation/tumor_s{seed}'
+    output_path_train_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expanded_extracted_tiles/train/tumor_s{seed}'
+    output_path_val_tumor = f'/fs/scratch/PAS1575/Pathology/CAMELYON16/expanded_extracted_tiles/validation/tumor_s{seed}'
 
 os.makedirs(output_path_train_tumor, exist_ok=True)
 os.makedirs(output_path_val_tumor, exist_ok=True)

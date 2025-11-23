@@ -176,7 +176,7 @@ SLIDE_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/testing/images/'
 ### run the extraction
 def main():
     # create output path
-    output_path_test_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/test/normal/'
+    output_path_test_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/test/normal/'
     os.makedirs(output_path_test_normal, exist_ok=True)
 
     slide_info, extract_allocation = cal_extract_allocation()

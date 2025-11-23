@@ -6,7 +6,8 @@
 
 ### Load libraries
 import sys
-sys.path.append('../')
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 from myKerasDataset import DataGenerator
@@ -35,8 +36,8 @@ for d in physical_devices:
         pass 
 
 
-ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/expandedIndividualMaskStainNorm'
-ROOT_PATH_NORMAL = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMaskStainNorm'
+ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/expanded_stain_normalized_tiles'
+ROOT_PATH_NORMAL = '/fs/scratch/PAS1575/Pathology/CAMELYON16/stain_normalized_tiles'
 ERROR_NAME = 'ERROR'
 
 

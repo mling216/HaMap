@@ -17,12 +17,87 @@ We validate HaMap’s reliability using four independent experiments. The result
 
 While whole-slide classification performance is strong, tile-level localization remains an area for further improvement.
 
-This repository will contain code, datasets, and pipelines for generating HaMap and HaMap++, as well as tools for evaluating saliency-guided diagnostic algorithms.
+This repository contains code, pipelines for generating HaMap and HaMap++, and tools for evaluating saliency-guided diagnostic algorithms. Metadata and reference files are included in `data/raw/`; larger datasets (WSI, eye-tracking data, predictions) must be downloaded separately (see Data section below).
+
+---
+
+## Data
+
+### CAMELYON16 Dataset
+Download the CAMELYON16 whole-slide images, ground truth masks, and related data from the official challenge website:
+- **Official site:** https://camelyon16.grand-challenge.org/Data/
+
+### Eye-tracking Data and HaMap Results
+Eye-tracking data, HaMap masks, and HaMap++ predictions are available at:
+- **OSF:** https://osf.io/hj9a7
+- **Google Drive:** See the folder link referenced in the paper
+
+We captured eye-tracking and mouse movement data for all participant-image pairs, recording:
+- **Saccades** (eye movements between fixations, shown as black lines)
+- **Fixations** (gaze points, shown as colored dots with size/color indicating duration)
+- **Zoom levels** at each fixation (shown as blue vertical bars)
+- **Mouse movements** during slide review
+
+<table>
+  <tr>
+    <td><img src="figures/eyetracking/teaser_P11_C10_test_051_clean.png" alt="Viewing behavior example 1" width="100%"/></td>
+    <td><img src="figures/eyetracking/teaser_P1_C1_test_001_clean.png" alt="Viewing behavior example 2" width="100%"/></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><i>Examples of pathologist's viewing behavior showing saccades, fixations, and zoom levels</i></td>
+  </tr>
+</table>
+
+---
+
+## Results
+
+### Localization Examples with HaMap and HaMap++
+<table style="width: 100%;">
+  <tr>
+    <td style="width: 50%;"><img src="figures/hamap_results_plots/tumor_016_PFMap_with_gt.png" alt="HaMap mask" style="width: 100%; height: auto; display: block;"/></td>
+    <td style="width: 50%;"><img src="figures/hamap++_results_plots/tumor_016_thumbnail_with_gt.png" alt="HaMap++ mask" style="width: 100%; height: auto; display: block;"/></td>
+  </tr>
+  <tr>
+    <td align="center"><i>HaMap mask based on pathologist's fixations</i></td>
+    <td align="center"><i>HaMap++ mask from HaMap-based DeepHaNet predictions</i></td>
+  </tr>
+</table>
+
+### WSI Tile Classification Performance
+<p align="center">
+  <img src="figures/combinedROCs.png" alt="ROC curves for test set tile classification" style="width: 70%; height: auto;"/>
+</p>
+<p align="center"><i>ROC curves and AUC values for test set tile classification comparing Ground truth, Viewport method, weakly supervised CLAM model, DeepHaNet (HaMap-based), and DeepHaNet++ (HaMap++-based).</i></p>
+
+### Comparison of Different Models
+<p align="center">
+  <img src="figures/hamap++_results_plots/expX_all_model_comparison.png" alt="Model comparison on 100K-tile test set" style="width: 80%; height: auto;"/>
+</p>
+<p align="center"><i>Classification metrics on the test set comparing baseline ground truth-trained models (Large: all train tumor slides, Small: random 20 tumor slides), Fixation-reduction (small): HaMap-based DeepHaNet using 20 HaMaps, Random-small: 20 tumor slides with randomly sampled tiles, and Random-large: all train tumor slides with random sampling.</i></p>
+
+### Weakly Supervised Tumor Localization with CLAM
+<table style="width: 100%;">
+  <tr>
+    <td style="width: 33.3%; text-align: center;"><img src="figures/weakly_supervised/test_051_gt.png" alt="Ground truth tumor region" style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; margin: 0 auto;"/></td>
+    <td style="width: 33.3%; text-align: center;"><img src="figures/weakly_supervised/test_051_CLAM_original.png" alt="CLAM original" style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; margin: 0 auto;"/></td>
+    <td style="width: 33.3%; text-align: center;"><img src="figures/weakly_supervised/test_051_CLAM_DeepHaNet_finetuned.png" alt="CLAM with DeepHaNet-finetuned ResNet50" style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; margin: 0 auto;"/></td>
+  </tr>
+  <tr>
+    <td align="center"><i>Ground truth tumor region</i></td>
+    <td align="center"><i>CLAM original (ImageNet pretrained ResNet50)</i></td>
+    <td align="center"><i>CLAM using DeepHaNet-finetuned ResNet50</i></td>
+  </tr>
+</table>
+<p align="center"><i>Attention-based heatmaps for tumor localization using the CLAM pipeline, comparing original ImageNet-pretrained features vs. DeepHaNet-finetuned features. Heatmaps are shown in grayscale where darker regions indicate higher tumor probability. In this example, DeepHaNet-finetuned CLAM better identifies the tumor region but produces more false positives in normal tissue areas.</i></p>
+
+---
 
 ## Environment Setup
 
-This project was developed and tested using Python X.Y and Conda.
-To reproduce the environment, create the environment from the YAML file:
+This project was developed and tested using Python 3.9 and Conda.
+
+**Main environment (hamap):**
 ```
 conda env create -f environment.yml
 conda activate hamap
@@ -72,10 +147,6 @@ To set up the `stainenv` environment:
 	```
 	This splits the tiles into 10 batches and processes batch 1. Adjust `-b` for other batches.
 
-**Note:**
-- The `stainenv.yml` file includes all required dependencies for stain normalization.
-- If you encounter issues with `spams`, the scripts will fall back to Macenko normalization (see code comments).
-
 ---
 
 ## Train and Test a Model
@@ -94,7 +165,29 @@ Where:
 
 ---
 
-## Results
+## Generate Whole-Slide Predictions (HaMap++)
+
+To generate whole-slide predictions using the DeepHaNet model for HaMap++:
+
+```bash
+cd code/models/hamap_pp/
+python modelDense256_vgg19_test_expanded_hdf5.py -s <slide_name>
+```
+
+Example:
+```bash
+python modelDense256_vgg19_test_expanded_hdf5.py -s normal_006
+```
+
+This generates tile-level predictions for the entire slide from HDF5-stored tiles. The predictions are saved to `whole_slide_prediction/<slide_name>.csv` and form the basis for HaMap++ analysis.
+
+**Requirements:**
+- Tiles are stored in HDF5 format at `/fs/ess/PAS1575/stain_norm_tiles_h5py/<slide_name>.hdf5`
+- Pre-trained model: `vgg19_models/TNsep_tumor_s26.h5`
+
+---
+
+## Additional Results and Figures
 
 ### Analysis Notebooks
 Key analysis notebooks are available in `code/analysis/`:
@@ -107,22 +200,24 @@ Key analysis notebooks are available in `code/analysis/`:
 Result plots are organized in `figures/`:
 
 **HaMap Results** (`figures/hamap_results_plots/`):
-- `AUC_compare_voting*.png` - AUC comparisons across voting strategies
+- `AUC_compare_voting.png` - AUC comparisons across voting strategies
 - `exp1_cohen_kappa.png` - Inter-rater agreement analysis
 - `exp1_result_voting_f1.png` - Voting results with F1 scores
 - `exp1_compare_wt_baseline_*.png` - Comparison with baseline methods
 - `exp2_compare_gaze_maps_*.png` - Gaze map comparison metrics
-- `fixation_iou_groundtruth.png` - Fixation overlap with ground truth
 - `num_fixation_tiles.png` - Fixation tile distribution
 
 **HaMap++ Results** (`figures/hamap_pp_results_plots/`):
 - `expX_model_comparison*.png` - Model performance comparisons
 - `mask_comparison_*.png` - Mask precision/recall analysis
 - `CLAM_vs_supervised_*.png` - CLAM vs supervised learning comparison
-- `expX_normal_gaze_proportion_comparison.png` - Normal gaze proportion analysis
+
+**Ablation Studies** (`figures/ablation/`):
+- `FROC_and_FP_analysis.png` - FROC score and false positive analysis
+- `roc_all_vs_voting_with_f1.png` - ROC curves comparing all models vs voting with F1 scores
 
 **Eye-tracking Visualizations** (`figures/eyetracking/`):
-- Thumbnail and PFMap visualizations with ground truth overlays
+- Pathologist viewing behavior examples with saccades, fixations, and zoom levels
 
 ---
 

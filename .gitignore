@@ -31,7 +31,10 @@ runs/
 *.log
 
 # Large / raw data (we'll manage via external storage)
-data/
+data/processed/
+data/results/
+data/TrackerData/
+data/vgg19_testing/
 *.h5
 *.hdf5
 *.tif

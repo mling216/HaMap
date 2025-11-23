@@ -329,12 +329,12 @@ ANNOTATION_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/lesion_annotations/'
 ### run the extraction
 def main(seed):
     # create output path
-    output_path_train_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/train/tumor/trainset_s%s/' % seed
+    output_path_train_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/train/tumor/trainset_s%s/' % seed
     os.makedirs(output_path_train_tumor, exist_ok=True)
     output_path_train_normal = '' # '/fs/scratch/PAS1575/Pathology/CAMELYON16/eyeTrack%d/train/normal/16train_s%s/' % (PATCH_SIZE, seed)
     # os.makedirs(output_path_train_normal, exist_ok=True)
 
-    output_path_val_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/validation/tumor/trainset_s%s/' % seed
+    output_path_val_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/validation/tumor/trainset_s%s/' % seed
     os.makedirs(output_path_val_tumor, exist_ok=True)
     output_path_val_normal = ''   # '/fs/scratch/PAS1575/Pathology/CAMELYON16/eyeTrack%d/validation/normal/4train_s%s/' % (PATCH_SIZE, seed)
     # os.makedirs(output_path_val_normal, exist_ok=True)

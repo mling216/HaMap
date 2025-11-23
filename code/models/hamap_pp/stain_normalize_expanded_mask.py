@@ -90,7 +90,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     folder = vars(args)['dataset']
     print('dataset path:', folder)
-    data_path = osp.join('/fs/scratch/PAS1575/Pathology/CAMELYON16/expandedIndividualMask', folder)
+    data_path = osp.join('/fs/scratch/PAS1575/Pathology/CAMELYON16/expanded_extracted_tiles', folder)
     n_prop = vars(args)['n_prop']
     batch = vars(args)['batch']
     print('number of proportions', n_prop, 'prop no.', batch)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     elif batch<1 or batch>n_prop:
         print('batch no. should be > 0 and <= num of proportion')
     else:
-        output_path = data_path.replace('expandedIndividualMask', 'expandedIndividualMaskStainNorm')  
+        output_path = data_path.replace('expanded_extracted_tiles', 'expanded_stain_normalized_tiles')  
         os.makedirs(output_path, exist_ok=True)
         main(data_path, output_path, n_prop, batch)
 

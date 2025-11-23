@@ -1,4 +1,4 @@
-name: CP
+name: hamap
 channels:
   - conda-forge
   - defaults

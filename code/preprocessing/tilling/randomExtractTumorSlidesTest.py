@@ -288,9 +288,9 @@ ANNOTATION_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/lesion_annotations_test/'
 ### run the extraction
 def main():
     # create output path
-    output_path_test_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/test/tumor/'
+    output_path_test_tumor = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/test/tumor/'
     os.makedirs(output_path_test_tumor, exist_ok=True)
-    output_path_test_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/test/normal/test_tumor/'
+    output_path_test_normal = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/test/normal/test_tumor/'
     # os.makedirs(output_path_test_normal, exist_ok=True)
 
     slide_info, extract_allocation = cal_extract_allocation()

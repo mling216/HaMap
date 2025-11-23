@@ -202,9 +202,9 @@ SLIDE_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/training/normal/'
 ### run the extraction
 def main(seed):
     # create output path
-    output_path_train = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/train/normal/trainset_s%s/' % seed
+    output_path_train = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/train/normal/trainset_s%s/' % seed
     os.makedirs(output_path_train, exist_ok=True)
-    output_path_val = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/validation/normal/trainset_s%s/' % seed
+    output_path_val = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/validation/normal/trainset_s%s/' % seed
     os.makedirs(output_path_val, exist_ok=True)
 
     slide_info, extract_allocation = cal_extract_allocation(seed)

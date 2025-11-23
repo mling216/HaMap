@@ -7,6 +7,9 @@
 
 ### Load libraries
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from myKerasDataset import DataGenerator
 import pickle
 import time
@@ -33,7 +36,7 @@ for d in physical_devices:
         pass 
 
 
-ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMaskStainNorm'
+ROOT_PATH = '/fs/scratch/PAS1575/Pathology/CAMELYON16/stain_normalized_tiles'
 ERROR_NAME = 'ERROR'
 
 ### parameters for the model

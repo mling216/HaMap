@@ -221,10 +221,10 @@ ANNOTATION_PATH = '/fs/ess/PAS1575/Dataset/CAMELYON16/lesion_annotations/'
 ### run the extraction
 def main(seed):
     # create output path
-    output_path_train = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/train/tumor/trainset_random_s%s/' % seed
+    output_path_train = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/train/tumor/trainset_random_s%s/' % seed
     os.makedirs(output_path_train, exist_ok=True)
 
-    output_path_val = '/fs/scratch/PAS1575/Pathology/CAMELYON16/individualMask/validation/tumor/trainset_random_s%s/' % seed
+    output_path_val = '/fs/scratch/PAS1575/Pathology/CAMELYON16/extracted_tiles/validation/tumor/trainset_random_s%s/' % seed
     os.makedirs(output_path_val, exist_ok=True)
 
     slide_info, extract_allocation = cal_extract_allocation(seed)
