@@ -47,7 +47,5 @@ data/vgg19_testing/
 # Cache dirs
 .cache/
 
-# Reviewer response drafts
-reviewer_response_draft.md
-reviewer_response_latex.tex
-reviewer_response_latex_condensed.tex
+# Paper drafts
+paper/
